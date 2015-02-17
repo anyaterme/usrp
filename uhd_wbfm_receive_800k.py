@@ -4,7 +4,7 @@
 # Title: Analizador con Audio
 # Author: Daniel Diaz
 # Description: Analizador con Audio
-# Generated: Thu Feb  5 13:03:07 2015
+# Generated: Tue Feb 17 13:17:44 2015
 ##################################################
 
 from PyQt4 import Qt
@@ -25,10 +25,9 @@ import sip
 import sys
 import time
 
-from distutils.version import StrictVersion
 class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
 
-    def __init__(self, gain=0, audio_output="", final_freq=110):
+    def __init__(self, final_freq=110, gain=0, audio_output=""):
         gr.top_block.__init__(self, "Analizador con Audio")
         Qt.QWidget.__init__(self)
         self.setWindowTitle("Analizador con Audio")
@@ -55,9 +54,9 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         ##################################################
         # Parameters
         ##################################################
+        self.final_freq = final_freq
         self.gain = gain
         self.audio_output = audio_output
-        self.final_freq = final_freq
 
         ##################################################
         # Variables
@@ -65,7 +64,7 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self.initial_freq_2 = initial_freq_2 = 104.3
         self.tun_freq_channel = tun_freq_channel = 0
         self.initial_freq = initial_freq = initial_freq_2
-        self.bandwidth = bandwidth = 1
+        self.bandwidth = bandwidth = 0
         self.tun_freq = tun_freq = initial_freq + (tun_freq_channel)*pow(2,1+bandwidth)
         self.volume = volume = 1
         self.variable_qtgui_label_0 = variable_qtgui_label_0 = tun_freq
@@ -119,20 +118,13 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         	lambda i: self.set_bandwidth(self._bandwidth_options[i]))
         self.top_grid_layout.addWidget(self._bandwidth_group_box, 0,1,1,1)
         self._variable_qtgui_label_0_tool_bar = Qt.QToolBar(self)
-        
-        if None:
-          self._variable_qtgui_label_0_formatter = None
-        else:
-          self._variable_qtgui_label_0_formatter = lambda x: x
-        
         self._variable_qtgui_label_0_tool_bar.addWidget(Qt.QLabel("Centra Freq (MHz)"+": "))
-        self._variable_qtgui_label_0_label = Qt.QLabel(str(self._variable_qtgui_label_0_formatter(self.variable_qtgui_label_0)))
+        self._variable_qtgui_label_0_label = Qt.QLabel(str(self.variable_qtgui_label_0))
         self._variable_qtgui_label_0_tool_bar.addWidget(self._variable_qtgui_label_0_label)
         self.top_grid_layout.addWidget(self._variable_qtgui_label_0_tool_bar, 1,0,1,1)
-          
         self.uhd_usrp_source_0 = uhd.usrp_source(
-        	",".join(("", "")),
-        	uhd.stream_args(
+        	device_addr="",
+        	stream_args=uhd.stream_args(
         		cpu_format="fc32",
         		channels=range(1),
         	),
@@ -162,6 +154,12 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self._tun_freq_channel_button_group.buttonClicked[int].connect(
         	lambda i: self.set_tun_freq_channel(self._tun_freq_channel_options[i]))
         self.top_grid_layout.addWidget(self._tun_freq_channel_group_box, 0,2,1,6)
+        self.rational_resampler_xxx_1 = filter.rational_resampler_ccc(
+                interpolation=1,
+                decimation=int(pow(2,2+bandwidth)*1e6/400e3),
+                taps=None,
+                fractional_bw=None,
+        )
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
         	1024, #size
         	firdes.WIN_BLACKMAN_hARRIS, #wintype
@@ -171,27 +169,6 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
                 1 #number of inputs
         )
         self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
-        self.qtgui_waterfall_sink_x_0.enable_grid(False)
-        
-        if complex == type(float()):
-          self.qtgui_waterfall_sink_x_0.set_plot_pos_half(not True)
-        
-        labels = ["", "", "", "", "",
-                  "", "", "", "", ""]
-        colors = [0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-        for i in xrange(1):
-            if len(labels[i]) == 0:
-                self.qtgui_waterfall_sink_x_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_waterfall_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_waterfall_sink_x_0.set_color_map(i, colors[i])
-            self.qtgui_waterfall_sink_x_0.set_line_alpha(i, alphas[i])
-        
-        self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 10)
-        
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win, 2,4,2,4)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
@@ -204,35 +181,10 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
         self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
-        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0.enable_grid(False)
-        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
-        
-        if complex == type(float()):
-          self.qtgui_freq_sink_x_0.set_plot_pos_half(not True)
-        
-        labels = ["", "", "", "", "",
-                  "", "", "", "", ""]
-        widths = [1, 1, 1, 1, 1,
-                  1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-                  "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-        for i in xrange(1):
-            if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
-        
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win, 2,0,2,4)
         self.low_pass_filter_0 = filter.fir_filter_ccf(1, firdes.low_pass(
-        	1, samp_rate, 115e3, 30e3, firdes.WIN_HANN, 6.76))
+        	1, 400e3, 115e3, 30e3, firdes.WIN_HANN, 6.76))
         self._initial_freq_2_layout = Qt.QVBoxLayout()
         self._initial_freq_2_label = Qt.QLabel("Freq (MHz)")
         self._initial_freq_2_slider = Qwt.QwtSlider(None, Qt.Qt.Vertical, Qwt.QwtSlider.LeftScale, Qwt.QwtSlider.BgSlot)
@@ -249,29 +201,38 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self._initial_freq_line_edit = Qt.QLineEdit(str(self.initial_freq))
         self._initial_freq_tool_bar.addWidget(self._initial_freq_line_edit)
         self._initial_freq_line_edit.returnPressed.connect(
-        	lambda: self.set_initial_freq(eng_notation.str_to_num(str(self._initial_freq_line_edit.text().toAscii()))))
+        	lambda: self.set_initial_freq(eng_notation.str_to_num(self._initial_freq_line_edit.text().toAscii())))
         self.top_grid_layout.addWidget(self._initial_freq_tool_bar, 0,0,1,1)
         self.blocks_multiply_const_vxx = blocks.multiply_const_vff((volume, ))
-        self.audio_sink = audio.sink(int(samp_rate/audio_decim), audio_output, True)
+        self.audio_sink = audio.sink(int(400e3/audio_decim), audio_output, True)
         self.analog_wfm_rcv = analog.wfm_rcv(
-        	quad_rate=samp_rate,
+        	quad_rate=400e3,
         	audio_decimation=audio_decim,
         )
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_wfm_rcv, 0), (self.blocks_multiply_const_vxx, 0))    
-        self.connect((self.blocks_multiply_const_vxx, 0), (self.audio_sink, 0))    
-        self.connect((self.low_pass_filter_0, 0), (self.analog_wfm_rcv, 0))    
-        self.connect((self.uhd_usrp_source_0, 0), (self.low_pass_filter_0, 0))    
-        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 0))    
-        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))    
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.low_pass_filter_0, 0), (self.analog_wfm_rcv, 0))
+        self.connect((self.analog_wfm_rcv, 0), (self.blocks_multiply_const_vxx, 0))
+        self.connect((self.blocks_multiply_const_vxx, 0), (self.audio_sink, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
+        self.connect((self.rational_resampler_xxx_1, 0), (self.low_pass_filter_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.rational_resampler_xxx_1, 0))
 
+
+# QT sink close method reimplementation
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "uhd_wbfm_receive_800k")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
+
+    def get_final_freq(self):
+        return self.final_freq
+
+    def set_final_freq(self, final_freq):
+        self.final_freq = final_freq
 
     def get_gain(self):
         return self.gain
@@ -285,19 +246,13 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
     def set_audio_output(self, audio_output):
         self.audio_output = audio_output
 
-    def get_final_freq(self):
-        return self.final_freq
-
-    def set_final_freq(self, final_freq):
-        self.final_freq = final_freq
-
     def get_initial_freq_2(self):
         return self.initial_freq_2
 
     def set_initial_freq_2(self, initial_freq_2):
         self.initial_freq_2 = initial_freq_2
-        Qt.QMetaObject.invokeMethod(self._initial_freq_2_slider, "setValue", Qt.Q_ARG("double", self.initial_freq_2))
         self.set_initial_freq(self.initial_freq_2)
+        Qt.QMetaObject.invokeMethod(self._initial_freq_2_slider, "setValue", Qt.Q_ARG("double", self.initial_freq_2))
 
     def get_tun_freq_channel(self):
         return self.tun_freq_channel
@@ -320,22 +275,22 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
 
     def set_bandwidth(self, bandwidth):
         self.bandwidth = bandwidth
-        self.set_tun_freq(self.initial_freq + (self.tun_freq_channel)*pow(2,1+self.bandwidth))
         self.set_samp_rate(pow(2,2+self.bandwidth)*1e6)
-        self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
-        self._bandwidth_callback(self.bandwidth)
+        self.set_tun_freq(self.initial_freq + (self.tun_freq_channel)*pow(2,1+self.bandwidth))
         self.qtgui_waterfall_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
         self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
+        self._bandwidth_callback(self.bandwidth)
+        self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
 
     def get_tun_freq(self):
         return self.tun_freq
 
     def set_tun_freq(self, tun_freq):
         self.tun_freq = tun_freq
-        self.set_variable_qtgui_label_0(self._variable_qtgui_label_0_formatter(self.tun_freq))
-        self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
         self.qtgui_waterfall_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
         self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
+        self.set_variable_qtgui_label_0(self.tun_freq)
+        self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
 
     def get_volume(self):
         return self.volume
@@ -366,7 +321,6 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
-        self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate, 115e3, 30e3, firdes.WIN_HANN, 6.76))
 
     def get_num_channels(self):
         return self.num_channels
@@ -390,17 +344,16 @@ if __name__ == '__main__':
         except:
             print "Warning: failed to XInitThreads()"
     parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
+    parser.add_option("", "--final-freq", dest="final_freq", type="eng_float", default=eng_notation.num_to_str(110),
+        help="Set final_freq [default=%default]")
     parser.add_option("-g", "--gain", dest="gain", type="eng_float", default=eng_notation.num_to_str(0),
         help="Set Default Gain [default=%default]")
     parser.add_option("-O", "--audio-output", dest="audio_output", type="string", default="",
         help="Set Audio Output Device [default=%default]")
-    parser.add_option("", "--final-freq", dest="final_freq", type="eng_float", default=eng_notation.num_to_str(110),
-        help="Set final_freq [default=%default]")
     (options, args) = parser.parse_args()
-    if(StrictVersion(Qt.qVersion()) >= StrictVersion("4.5.0")):
-        Qt.QApplication.setGraphicsSystem(gr.prefs().get_string('qtgui','style','raster'))
+    Qt.QApplication.setGraphicsSystem(gr.prefs().get_string('qtgui','style','raster'))
     qapp = Qt.QApplication(sys.argv)
-    tb = uhd_wbfm_receive_800k(gain=options.gain, audio_output=options.audio_output, final_freq=options.final_freq)
+    tb = uhd_wbfm_receive_800k(final_freq=options.final_freq, gain=options.gain, audio_output=options.audio_output)
     tb.start()
     tb.show()
     def quitting():
@@ -409,3 +362,4 @@ if __name__ == '__main__':
     qapp.connect(qapp, Qt.SIGNAL("aboutToQuit()"), quitting)
     qapp.exec_()
     tb = None #to clean up Qt widgets
+
