@@ -4,7 +4,7 @@
 # Title: Analizador con Audio
 # Author: Daniel Diaz
 # Description: Analizador con Audio
-# Generated: Tue Feb 17 13:17:44 2015
+# Generated: Tue Jun  9 14:03:25 2015
 ##################################################
 
 from PyQt4 import Qt
@@ -71,6 +71,7 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self.tun_gain = tun_gain = 10
         self.samp_rate = samp_rate = pow(2,2+bandwidth)*1e6
         self.num_channels = num_channels = 16
+        self.filter_decim = filter_decim = int(pow(2,2+bandwidth)*1e6/400e3)
         self.audio_decim = audio_decim = 10
 
         ##################################################
@@ -129,6 +130,7 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         		channels=range(1),
         	),
         )
+        self.uhd_usrp_source_0.set_clock_source("external", 0)
         self.uhd_usrp_source_0.set_subdev_spec("A:AB", 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_center_freq((tun_freq)*1e6+bandwidth-bandwidth, 0)
@@ -154,9 +156,9 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self._tun_freq_channel_button_group.buttonClicked[int].connect(
         	lambda i: self.set_tun_freq_channel(self._tun_freq_channel_options[i]))
         self.top_grid_layout.addWidget(self._tun_freq_channel_group_box, 0,2,1,6)
-        self.rational_resampler_xxx_1 = filter.rational_resampler_ccc(
+        self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
                 interpolation=1,
-                decimation=int(pow(2,2+bandwidth)*1e6/400e3),
+                decimation=filter_decim,
                 taps=None,
                 fractional_bw=None,
         )
@@ -170,7 +172,7 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         )
         self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win, 2,4,2,4)
+        self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win, 4,0,2,8)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
         	512, #size
         	firdes.WIN_BLACKMAN_hARRIS, #wintype
@@ -180,9 +182,9 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         	1 #number of inputs
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, -40)
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win, 2,0,2,4)
+        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win, 2,0,2,8)
         self.low_pass_filter_0 = filter.fir_filter_ccf(1, firdes.low_pass(
         	1, 400e3, 115e3, 30e3, firdes.WIN_HANN, 6.76))
         self._initial_freq_2_layout = Qt.QVBoxLayout()
@@ -218,8 +220,8 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
         self.connect((self.analog_wfm_rcv, 0), (self.blocks_multiply_const_vxx, 0))
         self.connect((self.blocks_multiply_const_vxx, 0), (self.audio_sink, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
-        self.connect((self.rational_resampler_xxx_1, 0), (self.low_pass_filter_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.rational_resampler_xxx_1, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.rational_resampler_xxx_0, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.low_pass_filter_0, 0))
 
 
 # QT sink close method reimplementation
@@ -275,30 +277,31 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
 
     def set_bandwidth(self, bandwidth):
         self.bandwidth = bandwidth
+        self.set_filter_decim(int(pow(2,2+self.bandwidth)*1e6/400e3))
         self.set_samp_rate(pow(2,2+self.bandwidth)*1e6)
         self.set_tun_freq(self.initial_freq + (self.tun_freq_channel)*pow(2,1+self.bandwidth))
         self.qtgui_waterfall_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
-        self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
         self._bandwidth_callback(self.bandwidth)
         self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
+        self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
 
     def get_tun_freq(self):
         return self.tun_freq
 
     def set_tun_freq(self, tun_freq):
         self.tun_freq = tun_freq
-        self.qtgui_waterfall_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
-        self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
         self.set_variable_qtgui_label_0(self.tun_freq)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
         self.uhd_usrp_source_0.set_center_freq((self.tun_freq)*1e6+self.bandwidth-self.bandwidth, 0)
+        self.qtgui_freq_sink_x_0.set_frequency_range((self.tun_freq)*1e6, pow(2,1+self.bandwidth)*1e6)
 
     def get_volume(self):
         return self.volume
 
     def set_volume(self, volume):
         self.volume = volume
-        self.blocks_multiply_const_vxx.set_k((self.volume, ))
         Qt.QMetaObject.invokeMethod(self._volume_knob, "setValue", Qt.Q_ARG("double", self.volume))
+        self.blocks_multiply_const_vxx.set_k((self.volume, ))
 
     def get_variable_qtgui_label_0(self):
         return self.variable_qtgui_label_0
@@ -327,6 +330,12 @@ class uhd_wbfm_receive_800k(gr.top_block, Qt.QWidget):
 
     def set_num_channels(self, num_channels):
         self.num_channels = num_channels
+
+    def get_filter_decim(self):
+        return self.filter_decim
+
+    def set_filter_decim(self, filter_decim):
+        self.filter_decim = filter_decim
 
     def get_audio_decim(self):
         return self.audio_decim
