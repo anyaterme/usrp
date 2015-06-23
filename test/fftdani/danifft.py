@@ -2,12 +2,11 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Danifft
-# Generated: Tue Jun  9 14:54:10 2015
+# Generated: Mon Jun 22 14:00:05 2015
 ##################################################
 
 from PyQt4 import Qt
 from PyQt4.QtCore import QObject, pyqtSlot
-from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import eng_notation
 from gnuradio import gr
@@ -51,8 +50,8 @@ class danifft(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.tunning = tunning = 432.1e6
-        self.samp_rate = samp_rate = 8e6
+        self.tunning = tunning = 840e6
+        self.samp_rate = samp_rate = 4e6
         self.range_freq = range_freq = 0
         self.fft_size = fft_size = 1024
 
@@ -67,10 +66,11 @@ class danifft(gr.top_block, Qt.QWidget):
         	),
         )
         self.uhd_usrp_source_0.set_clock_source("external", 0)
-        self.uhd_usrp_source_0.set_subdev_spec("A:AB", 0)
+        self.uhd_usrp_source_0.set_subdev_spec("B:0", 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_center_freq(tunning, 0)
         self.uhd_usrp_source_0.set_gain(10, 0)
+        self.uhd_usrp_source_0.set_antenna("J3", 0)
         self._range_freq_layout = Qt.QVBoxLayout()
         self._range_freq_tool_bar = Qt.QToolBar(self)
         self._range_freq_layout.addWidget(self._range_freq_tool_bar)
@@ -114,26 +114,17 @@ class danifft(gr.top_block, Qt.QWidget):
         	avg_alpha=1.0,
         	average=False,
         )
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
         self.blocks_null_sink_0_0 = blocks.null_sink(gr.sizeof_float*1)
-        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_float*1)
         self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*fft_size, "/home/laboratorio/develop/usrp/test/fftdani/fftusrp.dat", False)
         self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
-        self.blocks_add_xx_0 = blocks.add_vff(1)
-        self.analog_sig_source_x_0_0 = analog.sig_source_f(samp_rate, analog.GR_COS_WAVE, 1e6, 20, 0)
-        self.analog_sig_source_x_0 = analog.sig_source_f(samp_rate, analog.GR_COS_WAVE, tunning, 20, 0)
 
         ##################################################
         # Connections
         ##################################################
         self.connect((self.logpwrfft_x_0, 0), (self.blocks_file_sink_0, 0))
-        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.blocks_null_sink_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_complex_to_float_0, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.blocks_null_sink_0_0, 0))
-        self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_complex_to_float_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.logpwrfft_x_0, 0))
 
@@ -150,19 +141,15 @@ class danifft(gr.top_block, Qt.QWidget):
     def set_tunning(self, tunning):
         self.tunning = tunning
         self.uhd_usrp_source_0.set_center_freq(self.tunning, 0)
-        self.analog_sig_source_x_0.set_frequency(self.tunning)
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
-        self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
-        self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
-        self.logpwrfft_x_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.logpwrfft_x_0.set_sample_rate(self.samp_rate)
+        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
     def get_range_freq(self):
         return self.range_freq
