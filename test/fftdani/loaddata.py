@@ -77,7 +77,8 @@ def multi_file ():
 	plt.ylim(-140, 0)
 	plt.plot(averages)
 	plt.title("Duracion: %d horas, %d minutos, %s segundos" % (len(averages)/3600, (len(averages) % 3600) /60, len(averages) % 60))
-	plt.show()
+	#plt.show()
+	plt.savefig('test.png')
 
 #bytime()
 multi_file()
