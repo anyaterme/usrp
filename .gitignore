@@ -56,4 +56,4 @@ target/
 # Dani
 *.pyc
 Docs
-*.dat
+**.dat
