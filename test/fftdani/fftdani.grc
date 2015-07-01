@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <?grc format='1' created='3.7.8'?>
 <flow_graph>
-  <timestamp>Mon Jun 22 13:59:11 2015</timestamp>
+  <timestamp>Tue Jun  9 14:43:36 2015</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -76,30 +76,16 @@
   <block>
     <key>variable</key>
     <param>
-<<<<<<< HEAD
       <key>comment</key>
       <value></value>
-=======
-      <key>id</key>
-      <value>samp_rate</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-<<<<<<< HEAD
       <key>_coordinate</key>
       <value>(139, 460)</value>
-=======
-      <key>value</key>
-      <value>4e6</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(36, 292)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_rotation</key>
@@ -107,35 +93,18 @@
     </param>
     <param>
       <key>id</key>
-<<<<<<< HEAD
       <value>fft_size</value>
     </param>
     <param>
       <key>value</key>
       <value>1024</value>
-=======
-      <value>tunning</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>840e6</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
   </block>
   <block>
     <key>variable_qtgui_range</key>
     <param>
-<<<<<<< HEAD
       <key>comment</key>
       <value></value>
-=======
-      <key>_coordinate</key>
-      <value>(225, 278)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>value</key>
@@ -150,154 +119,8 @@
       <value>(468, 355)</value>
     </param>
     <param>
-<<<<<<< HEAD
       <key>gui_hint</key>
       <value></value>
-=======
-      <key>_coordinate</key>
-      <value>(127, 290)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>blocks_null_sink</key>
-    <param>
-      <key>id</key>
-      <value>blocks_null_sink_0_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>vlen</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>num_inputs</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>bus_conns</key>
-      <value>[[0,],]</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(654, 10)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>blocks_complex_to_float</key>
-    <param>
-      <key>id</key>
-      <value>blocks_complex_to_float_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>vlen</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(450, 44)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>qtgui_freq_sink_x</key>
-    <param>
-      <key>id</key>
-      <value>qtgui_freq_sink_x_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>name</key>
-      <value>QT GUI Plot</value>
-    </param>
-    <param>
-      <key>fftsize</key>
-      <value>fft_size</value>
-    </param>
-    <param>
-      <key>wintype</key>
-      <value>firdes.WIN_BLACKMAN_hARRIS</value>
-    </param>
-    <param>
-      <key>fc</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>bw</key>
-      <value>samp_rate</value>
-    </param>
-    <param>
-      <key>ymin</key>
-      <value>-140</value>
-    </param>
-    <param>
-      <key>ymax</key>
-      <value>10</value>
-    </param>
-    <param>
-      <key>nconnections</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>update_time</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(814, 106)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_rotation</key>
@@ -352,17 +175,12 @@
     </param>
     <param>
       <key>_coordinate</key>
-<<<<<<< HEAD
       <value>(36, 461)</value>
-=======
-      <value>(377, 263)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_rotation</key>
       <value>0</value>
     </param>
-<<<<<<< HEAD
     <param>
       <key>id</key>
       <value>samp_rate</value>
@@ -370,46 +188,13 @@
     <param>
       <key>value</key>
       <value>8e6</value>
-=======
-  </block>
-  <block>
-    <key>blocks_file_sink</key>
-    <param>
-      <key>id</key>
-      <value>blocks_file_sink_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>file</key>
-      <value>/home/laboratorio/develop/usrp/test/fftdani/fftusrp.dat</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>vlen</key>
-      <value>fft_size</value>
-    </param>
-    <param>
-      <key>unbuffered</key>
-      <value>False</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
   </block>
   <block>
     <key>variable</key>
     <param>
-<<<<<<< HEAD
       <key>comment</key>
       <value></value>
-=======
-      <key>append</key>
-      <value>False</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_enabled</key>
@@ -417,28 +202,15 @@
     </param>
     <param>
       <key>_coordinate</key>
-<<<<<<< HEAD
       <value>(247, 458)</value>
-=======
-      <value>(582, 389)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_rotation</key>
       <value>0</value>
     </param>
-<<<<<<< HEAD
     <param>
       <key>id</key>
       <value>tunning</value>
-=======
-  </block>
-  <block>
-    <key>logpwrfft_x</key>
-    <param>
-      <key>id</key>
-      <value>logpwrfft_x_0</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>value</key>
@@ -448,7 +220,6 @@
   <block>
     <key>analog_sig_source_x</key>
     <param>
-<<<<<<< HEAD
       <key>amp</key>
       <value>20</value>
     </param>
@@ -471,54 +242,10 @@
     <param>
       <key>freq</key>
       <value>tunning</value>
-=======
-      <key>type</key>
-      <value>float</value>
-    </param>
-    <param>
-      <key>sample_rate</key>
-      <value>samp_rate</value>
-    </param>
-    <param>
-      <key>fft_size</key>
-      <value>fft_size</value>
-    </param>
-    <param>
-      <key>ref_scale</key>
-      <value>2</value>
-    </param>
-    <param>
-      <key>frame_rate</key>
-      <value>2</value>
-    </param>
-    <param>
-      <key>average</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>avg_alpha</key>
-      <value>1.0</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
     </param>
     <param>
       <key>_coordinate</key>
-<<<<<<< HEAD
       <value>(49, 173)</value>
-=======
-      <value>(718, 216)</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>_rotation</key>
@@ -584,13 +311,8 @@
       <value>(49, 315)</value>
     </param>
     <param>
-<<<<<<< HEAD
       <key>_rotation</key>
       <value>0</value>
-=======
-      <key>sd_spec0</key>
-      <value>B:0</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>id</key>
@@ -1093,7 +815,6 @@
       <value></value>
     </param>
     <param>
-<<<<<<< HEAD
       <key>width2</key>
       <value>1</value>
     </param>
@@ -1108,10 +829,6 @@
     <param>
       <key>label3</key>
       <value></value>
-=======
-      <key>ant0</key>
-      <value>J3</value>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     </param>
     <param>
       <key>width3</key>
@@ -1760,7 +1477,6 @@
       <key>gain30</key>
       <value>0</value>
     </param>
-<<<<<<< HEAD
     <param>
       <key>ant31</key>
       <value></value>
@@ -2093,8 +1809,6 @@
       <key>otw</key>
       <value></value>
     </param>
-=======
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
   </block>
   <connection>
     <source_block_id>analog_sig_source_x_0</source_block_id>
@@ -2103,7 +1817,6 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-<<<<<<< HEAD
     <source_block_id>analog_sig_source_x_0_0</source_block_id>
     <sink_block_id>blocks_add_xx_0</sink_block_id>
     <source_key>0</source_key>
@@ -2124,10 +1837,6 @@
   <connection>
     <source_block_id>blocks_complex_to_float_0</source_block_id>
     <sink_block_id>logpwrfft_x_0</sink_block_id>
-=======
-    <source_block_id>uhd_usrp_source_0</source_block_id>
-    <sink_block_id>blocks_complex_to_float_0</sink_block_id>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
@@ -2138,7 +1847,6 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-<<<<<<< HEAD
     <source_block_id>blocks_throttle_0</source_block_id>
     <sink_block_id>blocks_null_sink_0</sink_block_id>
     <source_key>0</source_key>
@@ -2147,10 +1855,6 @@
   <connection>
     <source_block_id>logpwrfft_x_0</source_block_id>
     <sink_block_id>blocks_file_sink_0</sink_block_id>
-=======
-    <source_block_id>blocks_complex_to_float_0</source_block_id>
-    <sink_block_id>qtgui_freq_sink_x_0</sink_block_id>
->>>>>>> 3f9861c50a7e26c6c3b0d2a899fc1255ec2d2ced
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

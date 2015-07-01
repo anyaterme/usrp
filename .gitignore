@@ -57,3 +57,4 @@ target/
 *.pyc
 Docs
 **.dat
+**settings.py
