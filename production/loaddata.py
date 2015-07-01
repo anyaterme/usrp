@@ -71,10 +71,10 @@ def multi_file ():
 		for i in range(rates):
 			aux = dataFile[i*(fftsize*frames):(i+1)*fftsize*frames]
 			data[i] = (np.asarray(aux))
-			averages = averages + [np.average(data[i])]
+			averages = averages + [np.median(data[i])]
 	fig1 = plt.figure()
 	plt.xlim(0, len(averages))
-	plt.ylim(-140, 0)
+	plt.ylim(-130, -110)
 	plt.plot(averages)
 	plt.title("Duracion: %d horas, %d minutos, %s segundos" % (len(averages)/3600, (len(averages) % 3600) /60, len(averages) % 60))
 	plt.show()
