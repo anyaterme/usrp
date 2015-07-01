@@ -1,19 +1,22 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import matplotlib
+import settings
+import datetime
 #matplotlib.use('TKAgg')
 
 
 
 fftsize=1024
 freq = 2048e6
-frames = 1
+frames = 2
 data = None
 previous = 0
 rates = 0
 
-debug = True
+debug = False
 
 def generate_data():
 	global data
@@ -55,32 +58,45 @@ def bytime():
 	plt.plot(averages)
 	plt.show()
 
-def multi_file ():
+def multi_file (time=0):
 	import glob, os
-	path = "./"
+	path = settings.path
 	os.chdir(path)
 
 	averages=[]
-	for file in glob.glob("univer*.dat"):
-		print(file)
+	for file in glob.glob("fftusrp.dat"):
+		if debug:
+			print(file)
 		dataFile = np.fromfile(file, np.float32)
-		print dataFile.size
+		if debug:
+			print dataFile.size
 		rates = dataFile.size /fftsize /frames
 		rates = rates - 1
 		data = np.empty([rates, fftsize*frames])
-		for i in range(rates):
-			aux = dataFile[i*(fftsize*frames):(i+1)*fftsize*frames]
-			data[i] = (np.asarray(aux))
-			averages = averages + [np.average(data[i])]
+		if (time == 0):
+			for i in range(rates):
+				aux = dataFile[i*(fftsize*frames):(i+1)*fftsize*frames]
+				data[i] = (np.asarray(aux))
+				averages = averages + [np.average(data[i])]
+		else:
+			for i in range(rates - time, rates):
+				aux = dataFile[i*(fftsize*frames):(i+1)*fftsize*frames]
+				data[i] = (np.asarray(aux))
+				averages = averages + [np.average(data[i])]
+	if debug:
+		print "Preparando figura"
 	fig1 = plt.figure()
 	plt.xlim(0, len(averages))
-	plt.ylim(-140, 0)
+	plt.ylim(-140, 80)
 	plt.plot(averages)
-	plt.title("Duracion: %d horas, %d minutos, %s segundos" % (len(averages)/3600, (len(averages) % 3600) /60, len(averages) % 60))
+	plt.title("Duracion: %d horas, %d minutos, %s segundos\nHora actual: %s" % (len(averages)/3600, (len(averages) % 3600) /60, len(averages) % 60, datetime.datetime.now().strftime("%b %d %Y %H:%M:%S")))
 	#plt.show()
-	plt.savefig('test.png')
+	plt.savefig('%stest%d.png' % (settings.path, time))
 
 #bytime()
+#multi_file(time=600)
+#multi_file(time=3600)
+#multi_file(time=3600*5)
 multi_file()
 
 
