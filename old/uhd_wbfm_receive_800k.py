@@ -4,7 +4,7 @@
 # Title: Analizador con Audio
 # Author: Daniel Diaz
 # Description: Analizador con Audio
-# Generated: Tue Jun  9 14:03:25 2015
+# Generated: Tue Jun 30 13:35:51 2015
 ##################################################
 
 from PyQt4 import Qt

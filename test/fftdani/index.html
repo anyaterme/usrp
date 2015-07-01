@@ -21,30 +21,30 @@
 				<div class="col-xs-4">
 					<div class="left panel panel-info">
 						<div class="panel panel-heading">
-							<h1>Morelia</h1>
+							<h1>10 minutos</h1>
 						</div>
 						<div class="panel-body">
-							<img src="./test.png" class="img-responsive"/> 
+							<img id="img01" src="./test600.png" class="img-responsive"/> 
 						</div>
 					</div>
 				</div>
 				<div class="col-xs-4">
 					<div class="left panel panel-info">
 						<div class="panel panel-heading">
-							<h1>Universum USRP</h1>
+							<h1>1 hora</h1>
 						</div>
 						<div class="panel-body">
-							<img src="./test.png" class="img-responsive"/> 
+							<img img="img02" src="./test3600.png" class="img-responsive"/> 
 						</div>
 					</div>
 				</div>
 				<div class="col-xs-4">
 					<div class="left panel panel-info">
 						<div class="panel panel-heading">
-							<h1>Universum H2</h1>
+							<h1>5 horas</h1>
 						</div>
 						<div class="panel-body">
-							<img src="./test.png" class="img-responsive"/> 
+							<img id="img03" src="./test18000.png" class="img-responsive"/> 
 						</div>
 					</div>
 				</div>
@@ -52,6 +52,9 @@
 		</div>
 		<script>
 			// $('.left').fadeOut();
+			setInterval(function() { src=$('#img01').attr("src")+"?"+new Date().getTime();; $('#img01').attr("src", src); },60000);
+			setInterval(function() { src=$('#img02').attr("src")+"?"+new Date().getTime();; $('#img02').attr("src", src); },60000);
+			setInterval(function() { src=$('#img03').attr("src")+"?"+new Date().getTime();; $('#img03').attr("src", src); },60000);
 		</script>
 	</body>
 </html>

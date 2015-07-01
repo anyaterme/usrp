@@ -2,7 +2,7 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Danifft
-# Generated: Mon Jun 22 14:00:05 2015
+# Generated: Tue Jun 30 13:41:17 2015
 ##################################################
 
 from PyQt4 import Qt
@@ -50,7 +50,7 @@ class danifft(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.tunning = tunning = 840e6
+        self.tunning = tunning = 103.3e6
         self.samp_rate = samp_rate = 4e6
         self.range_freq = range_freq = 0
         self.fft_size = fft_size = 1024
@@ -65,12 +65,10 @@ class danifft(gr.top_block, Qt.QWidget):
         		channels=range(1),
         	),
         )
-        self.uhd_usrp_source_0.set_clock_source("external", 0)
-        self.uhd_usrp_source_0.set_subdev_spec("B:0", 0)
+        self.uhd_usrp_source_0.set_subdev_spec("A:A", 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_center_freq(tunning, 0)
         self.uhd_usrp_source_0.set_gain(10, 0)
-        self.uhd_usrp_source_0.set_antenna("J3", 0)
         self._range_freq_layout = Qt.QVBoxLayout()
         self._range_freq_tool_bar = Qt.QToolBar(self)
         self._range_freq_layout.addWidget(self._range_freq_tool_bar)
