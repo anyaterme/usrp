@@ -1,17 +1,15 @@
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import settings
 import datetime
 #matplotlib.use('TKAgg')
-
-
+import sys
 
 fftsize=1024
-freq = 2048e6
-frames = 2
+frames = 1
 data = None
 previous = 0
 rates = 0
@@ -93,11 +91,28 @@ def multi_file (time=0):
 	#plt.show()
 	plt.savefig('%stest%d.png' % (settings.path, time))
 
+def test(time=0):
+	dataFile = np.fromfile('./fftusrp.dat', np.float32)
+	debug = True
+	rates = dataFile.size /fftsize /frames
+	rates = rates - 1
+	if (time == 0):
+		data = np.asarray(dataFile)
+	else:
+		data = np.asarray(dataFile[dataFile.size-time*frames*fftsize:])
+	if debug:
+		print "Data:", dataFile, dataFile.size, fftsize, frames, data.size
+	fig1 = plt.figure()
+	plt.plot(data)
+	plt.show()
+
+
 #bytime()
 #multi_file(time=600)
 #multi_file(time=3600)
 #multi_file(time=3600*5)
-multi_file()
+#multi_file()
+
 
 
 
@@ -108,4 +123,7 @@ multi_file()
 ##line_ani = animation.FuncAnimation(fig1, update_data, rates, fargs=(data, aux), interval=int(1000.0/frames), blit=True, repeat=False)
 #line_ani = animation.FuncAnimation(fig1, update_data, rates, fargs=(data, None), interval=1, blit=True, repeat=False)
 #plt.show()
+#
+
+test(time=1)
 
