@@ -55,6 +55,12 @@ target/
 
 # Dani
 *.pyc
+**.swp
+**.old
 Docs
 **.dat
-**settings.py
+**.DS_Store
+test/fftdani/settings.py
+test/fftdani/danifft.py
+test/fftdani/images/*.png
+**.mp4
