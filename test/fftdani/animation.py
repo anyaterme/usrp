@@ -76,5 +76,5 @@ def generate_frames(path="./"):
 line = None
 x = None
 
-#generate_animation()
-generate_frames("./images")
+generate_animation()
+#generate_frames("./images")
