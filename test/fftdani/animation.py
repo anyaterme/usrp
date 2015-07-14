@@ -14,7 +14,7 @@ rates = 0
 
 debug = False
 
-def generate_data():
+def generate_data(filename="*.dat"):
 	global data
 	global fftsize
 	global rates
@@ -22,7 +22,7 @@ def generate_data():
 	os.chdir(settings.path)
 
 	data = []
-	for file in glob.glob("univer*.dat"):
+	for file in glob.glob(filename):
 		dataFile = np.fromfile(file, np.float32)
 		data = np.concatenate([data,np.asarray(dataFile)])
 	rates = data.size /fftsize 
@@ -42,10 +42,10 @@ def init():
 	return line,
 
 
-def generate_animation():
+def generate_animation(path="./", filename="*.dat"):
 	global line
 	global x
-	generate_data()
+	generate_data(filename)
 	fig, ax = plt.subplots()
 	plt.xlim(0, fftsize)
 	plt.ylim(np.amin(data)*1.1, np.amax(data)*1.1)
@@ -57,12 +57,12 @@ def generate_animation():
 	print datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 	print "FIN ANIMACION"
 
-def generate_frames(path="./"):
+def generate_frames(path="./", filename="*.dat"):
 	global rates, data, line
-	generate_data()
+	generate_data(filename)
 	print "GENERATING FRAME "
+	control_point = int(rates * 0.01)
 	for i in range(0,rates):
-		print "%05d OF %d" % (i+1, rates),
 		fig, ax = plt.subplots()
 		plt.xlim(0, fftsize)
 		plt.ylim(np.amin(data)*1.1, np.amax(data)*1.1)
@@ -70,11 +70,16 @@ def generate_frames(path="./"):
 		ydata = data[i*fftsize:(i+1)*fftsize]
 		if (x.size == ydata.size):
 			line, = ax.plot(x, ydata)
+			median = np.empty(x.size)
+			median.fill(np.median(ydata))
+			line, = ax.plot(x, median, 'r')
 			plt.savefig(os.path.join(path, "image%05d.png" % i))
 			plt.close()
+			if i % control_point == 0:
+				print "%d% completed...." % (int(i / control_point))
 
 line = None
 x = None
 
-generate_animation()
-#generate_frames("./images")
+#generate_animation("./fttusrp.dat")
+generate_frames("./images", "./fftusrpmeta.dat")

@@ -9,7 +9,7 @@ import datetime
 import sys
 
 fftsize=1024
-frames = 1
+frames = 2
 data = None
 previous = 0
 rates = 0
@@ -125,5 +125,4 @@ def test(time=0):
 #plt.show()
 #
 
-test(time=1)
 
