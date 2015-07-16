@@ -59,8 +59,10 @@ target/
 **.old
 Docs
 **.dat
+**.dat**
 **.DS_Store
 test/fftdani/settings.py
 test/fftdani/danifft.py
 test/fftdani/images/*.png
 **.mp4
+**.png

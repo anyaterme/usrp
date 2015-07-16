@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import settings
-import sys, os, datetime
+import sys, os, datetime, glob
 import pmt
 from gnuradio.blocks import parse_file_metadata as pfm
 
@@ -21,7 +21,6 @@ def generate_data(filename="*.dat"):
 	global data
 	global fftsize
 	global rates
-	import glob, os
 	os.chdir(settings.path)
 
 	data = []
@@ -74,10 +73,13 @@ def generate_animation(path="./", filename="*.dat"):
 	print datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 	print "FIN ANIMACION"
 
-def generate_frames(data, rates, fftsize, path="./", filename="*.dat", interferences = False):
+def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 	global line
 	print "GENERATING FRAME "
-	#generate_data("metafile.dat")
+	print path
+	print "\tRemoving older images... "
+	for file in glob.glob(path+"/*.png"):
+		os.remove(file)
 	perc = 0
 	for i in range(0,rates):
 		fig, ax = plt.subplots()
@@ -91,21 +93,26 @@ def generate_frames(data, rates, fftsize, path="./", filename="*.dat", interfere
 			median_value = np.median(ydata)
 			median.fill(median_value)
 			line, = ax.plot(x, median, 'r')
-			line, = ax.plot(x, median / 2, 'g')
-			if (interferences):
-				block_interferences = detect_signal(ydata, 1, headerDict)
-				block_array = np.empty(x.size)
-				block_array.fill(np.min(ydata))
-				for index in block_interferences:
-					block_array[index] = 0
-				line, = ax.plot(x, block_array, 'black')
+			if (detection_limit != None):
+				line, = ax.plot(x, median * (1-detection_limit), 'g')
+				block_interferences = detect_signal(ydata, 1, headerDict, detection_limit)
+				block_array = np.empty(block_interferences.size)
+				for index in range(block_interferences.size):
+					block_array[index] = ydata[block_interferences[index]]
+				ax.scatter(block_interferences, block_array)
+
+#				block_array = np.empty(x.size)
+#				block_array.fill(np.min(ydata))
+#				for index in block_interferences:
+#					block_array[index] = 0
+#				line, = ax.plot(x, block_array, 'black')
 			plt.savefig(os.path.join(path, "image%05d.png" % i))
 			plt.close()
 			if int(i*1.0/rates*100.0) != perc:
 				perc = int(i*1.0/rates*100.0)
 				print "%d%% completed...." % perc
 
-def detect_signal(data, rates, headerDict, print_msg = False):
+def detect_signal(data, rates, headerDict, detection_limit = 0.1, print_msg = False):
 	if (print_msg):
 		print "DETECTING SIGNALS..."
 	perc = 0
@@ -115,7 +122,7 @@ def detect_signal(data, rates, headerDict, print_msg = False):
 		ydata= data[i*fftsize:(i+1)*fftsize]
 		if (fftsize == ydata.size):
 			median_value = np.median(ydata)
-			aux, = np.where(ydata > median_value/2)
+			aux, = np.where(ydata > median_value * (1-detection_limit))
 			positives = np.concatenate([positives, aux])
 			if (int(i*1.0/rates*100.0) != perc) and (print_msg):
 				perc = int(i*1.0/rates*100.0)
@@ -138,7 +145,7 @@ x = None
 
 if (__name__ == '__main__'):
 	#generate_animation("./fttusrp.dat")
-	headerDict, data, rates = generate_data("metafile.dat")
-	detect_signal(data, rates, headerDict, True)
-	generate_frames(data, rates, fftsize, "./images", "metafile.dat", True)
+	headerDict, data, rates = generate_data("DATA-20150716.dat")
+	#detect_signal(data, rates, headerDict, 0.1, True)
+	generate_frames(data, rates, fftsize, "./images", 0.1)
 	
