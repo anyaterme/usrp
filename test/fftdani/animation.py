@@ -26,17 +26,22 @@ def generate_data(filename="*.dat"):
 	data = []
 	for file in glob.glob(filename):
 		print "LOADING HEADER..."
-		f = open ("./%s.hdr" % file, "r")
-		data_with_header = f.read()
-		f.close()
-		header = pmt.deserialize_str(data_with_header)
-		headerDict = pfm.parse_header(header)
-		f = open ("./%s.hdr_extra" % file, "r")
-		header_extra = f.read()
-		aux = eval (header_extra)
-		f.close()
-		for key in aux:
-			headerDict[key] = aux[key]
+		if (os.path.exists("./%s.hdr" % file)):
+			f = open ("./%s.hdr" % file, "r")
+			data_with_header = f.read()
+			f.close()
+			header = pmt.deserialize_str(data_with_header)
+			headerDict = pfm.parse_header(header)
+			auxDict={}
+			pfm.parse_extra_dict(header, auxDict, True)
+			print auxDict
+		if (os.path.exists("./%s.hdr_extra" % file)):
+			f = open ("./%s.hdr_extra" % file, "r")
+			header_extra = f.read()
+			aux = eval (header_extra)
+			f.close()
+			for key in aux:
+				headerDict[key] = aux[key]
 		print "LOADING DATA..."
 		dataFile = np.fromfile(file, np.float32)
 		data = np.concatenate([data,np.asarray(dataFile)])
@@ -145,7 +150,8 @@ x = None
 
 if (__name__ == '__main__'):
 	#generate_animation("./fttusrp.dat")
-	headerDict, data, rates = generate_data("DATA-20150716.dat")
-	#detect_signal(data, rates, headerDict, 0.1, True)
-	generate_frames(data, rates, fftsize, "./images", 0.1)
+	headerDict, data, rates = generate_data("DATA-2015071712.dat")
+	print headerDict
+	#print detect_signal(data, rates, headerDict, 0.1, True)
+	#generate_frames(data, rates, fftsize, "./images", 0.1)
 	

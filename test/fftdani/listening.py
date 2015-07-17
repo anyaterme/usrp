@@ -44,14 +44,15 @@ class listening(gr.top_block):
 		self.uhd_usrp_source_0.set_center_freq(tunning*1e6, 0)
 		self.uhd_usrp_source_0.set_gain(0, 0)
 		self.logpwrfft_x_0 = logpwrfft.logpwrfft_c( sample_rate=samp_rate, fft_size=fft_size, ref_scale=2, frame_rate=frame_rate, avg_alpha=1.0, average=False,)
-		self.blocks_file_meta_sink_0 = blocks.file_meta_sink(gr.sizeof_float*fft_size, filepath, samp_rate, 1, blocks.GR_FILE_FLOAT, False, 1000000000, "", True)
-		self.blocks_file_meta_sink_0.set_unbuffered(False)
+
+ 		self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*fft_size, filepath, False)
+		self.blocks_file_sink_0.set_unbuffered(False)
 
 		##################################################
 		# Connections
 		##################################################
 		self.connect((self.uhd_usrp_source_0, 0), (self.logpwrfft_x_0, 0))
-		self.connect((self.logpwrfft_x_0, 0), (self.blocks_file_meta_sink_0, 0))
+		self.connect((self.logpwrfft_x_0, 0), (self.blocks_file_sink_0, 0))
 
 
 # QT sink close method reimplementation
@@ -77,20 +78,49 @@ class listening(gr.top_block):
 	def set_fft_size(self, fft_size):
 		self.fft_size = fft_size
 
+def writeHeaderData(filepath, list_freq, tb, time_between_freqs):
+	filepath = "%s.hdr" % filepath
+	file = open (filepath, "w")
+	header = {}
+	header["list_freq"] = list_freq
+	header["time_between_freqs"] = time_between_freqs
+	header["samp_rate"] = tb.samp_rate
+	header["center_freq"] = tb.tunning
+	header["frame_rate"] = tb.frame_rate
+	header["channels"] = tb.fft_size
+	file.write(str(header))
+	file.close()
+
+
 if __name__ == '__main__':
+
+	tbtwfreq = 60
+
+	code_date_format = "%Y%m%d%H"
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
 	(options, args) = parser.parse_args()
-	tb = listening()
-	tb.start()
-	initial_time = time.time()
-	index = 0
-	nbc = NonBlockingConsole()
 	list_freq = range (10, 100, 8)
+	index = 0
+	codeFile = "./DATA-%s.dat" % datetime.datetime.now().strftime(code_date_format)
+	tb = listening(_center_freq=list_freq[index % len(list_freq)], filepath=codeFile)
+	writeHeaderData (codeFile, list_freq, tb, tbtwfreq)
+	nbc = NonBlockingConsole()
 	print "Press any key to quit."
 	print "Listening to %d MHz..." % list_freq[index % len(list_freq)]
+	tb.start()
+	tb.set_tunning(list_freq[index % len(list_freq)])
+	initial_time = time.time()
 	while (True):
+		current_codeFile = "./DATA-%s.dat" % datetime.datetime.now().strftime(code_date_format)
+		if (current_codeFile != codeFile):
+			codeFile = current_codeFile
+			tb.stop()
+			tb.wait()
+			tb = listening(_center_freq=list_freq[index % len(list_freq)], filepath=codeFile)
+			writeHeaderData (codeFile, list_freq, tb, tbtwfreq)
+			tb.start()
 		current_time = time.time()
-		if (current_time - initial_time > 60):
+		if (current_time - initial_time > tbtwfreq):
 			index = index + 1
 			initial_time = current_time
 			print "Listening to %d MHz..." % list_freq[index % len(list_freq)]
