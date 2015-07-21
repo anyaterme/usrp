@@ -7,6 +7,9 @@ import settings
 import sys, os, datetime, glob
 import pmt
 from gnuradio.blocks import parse_file_metadata as pfm
+from argparse import ArgumentParser
+import scipy.spatial.distance as dist
+from utils import NonBlockingConsole
 
 fftsize=1024
 frames = 2
@@ -25,24 +28,19 @@ def generate_data(filename="*.dat"):
 
 	data = []
 	for file in glob.glob(filename):
-		print "LOADING HEADER..."
 		if (os.path.exists("./%s.hdr" % file)):
+#			f = open ("./%s.hdr" % file, "r")
+#			data_with_header = f.read()
+#			f.close()
+#			header = pmt.deserialize_str(data_with_header)
+#			headerDict = pfm.parse_header(header)
+#			auxDict={}
+#			pfm.parse_extra_dict(header, auxDict, True)
+#			print auxDict
 			f = open ("./%s.hdr" % file, "r")
-			data_with_header = f.read()
-			f.close()
-			header = pmt.deserialize_str(data_with_header)
-			headerDict = pfm.parse_header(header)
-			auxDict={}
-			pfm.parse_extra_dict(header, auxDict, True)
-			print auxDict
-		if (os.path.exists("./%s.hdr_extra" % file)):
-			f = open ("./%s.hdr_extra" % file, "r")
 			header_extra = f.read()
-			aux = eval (header_extra)
+			headerDict = eval (header_extra)
 			f.close()
-			for key in aux:
-				headerDict[key] = aux[key]
-		print "LOADING DATA..."
 		dataFile = np.fromfile(file, np.float32)
 		data = np.concatenate([data,np.asarray(dataFile)])
 	rates = data.size /fftsize 
@@ -86,6 +84,11 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 	for file in glob.glob(path+"/*.png"):
 		os.remove(file)
 	perc = 0
+	prev_ydata=data[0:fftsize]
+	prev_distance = 0
+	nbc = NonBlockingConsole()
+	dataReferences = []
+	print "Press any key to stop frame's generation..."
 	for i in range(0,rates):
 		fig, ax = plt.subplots()
 		plt.xlim(0, fftsize)
@@ -105,6 +108,28 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 				for index in range(block_interferences.size):
 					block_array[index] = ydata[block_interferences[index]]
 				ax.scatter(block_interferences, block_array)
+				aux_data = ydata
+				aux_data[np.where(aux_data <= np.median(aux_data) * (1- detection_limit))] = 0
+				aux_data[np.where(aux_data > np.median(aux_data) * (1- detection_limit))] = 1.0
+				#ydata = aux_data
+				distance = dist.sqeuclidean(ydata, prev_ydata)
+				diff_std = abs(np.std(ydata) - np.std(prev_ydata))
+				change = False
+				if (prev_distance!= 0):
+					ratio = (min([distance, prev_distance])*1.0)/(max([distance, prev_distance])*1.0) * 100.0
+					if ((ratio < 50.0) and (diff_std > 2)):
+						change = True
+						dataReferences.append(ydata)
+						prev_ydata=ydata
+				else:
+					dataReferences.append(ydata)
+					prev_ydata=ydata
+					ratio = 100
+
+				ax.set_title("%d, Similitud: %d%%" % (diff_std, ratio))
+				if (change):
+					ax.set_axis_bgcolor('red')
+				prev_distance = distance
 
 #				block_array = np.empty(x.size)
 #				block_array.fill(np.min(ydata))
@@ -116,6 +141,11 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 			if int(i*1.0/rates*100.0) != perc:
 				perc = int(i*1.0/rates*100.0)
 				print "%d%% completed...." % perc
+		else:
+			prev_distance=0
+
+		if nbc.get_data() != False:
+			break
 
 def detect_signal(data, rates, headerDict, detection_limit = 0.1, print_msg = False):
 	if (print_msg):
@@ -134,7 +164,7 @@ def detect_signal(data, rates, headerDict, detection_limit = 0.1, print_msg = Fa
 				#print "%d%% completed...." % perc
 	positives = np.unique(positives)
 	if (print_msg):
-		samp_rate = headerDict["rx_rate"]
+		samp_rate = headerDict["samp_rate"]
 		center_freq = headerDict["center_freq"]
 		channel_width = samp_rate / fftsize
 		print "Signal detected in:"
@@ -149,9 +179,16 @@ line = None
 x = None
 
 if (__name__ == '__main__'):
-	#generate_animation("./fttusrp.dat")
-	headerDict, data, rates = generate_data("DATA-2015071712.dat")
-	print headerDict
-	#print detect_signal(data, rates, headerDict, 0.1, True)
-	#generate_frames(data, rates, fftsize, "./images", 0.1)
+	parser= ArgumentParser(description = "Data analysis of file from USRP")
+	parser.add_argument('--files', help='List of files to process', nargs='+')
+	arguments = parser.parse_args()
+	listFiles = arguments.files
+	if listFiles == None:
+		listFiles = glob.glob("./*.dat")
+	for file in listFiles:
+		#generate_animation("./fttusrp.dat")
+		headerDict, data, rates = generate_data(file)
+		print headerDict
+		#detect_signal(data, rates, headerDict, 0.1, True)
+		generate_frames(data, rates, fftsize, "./images", 0.1)
 	
