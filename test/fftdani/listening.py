@@ -6,6 +6,7 @@
 # Generated: Thu Jul 16 12:34:06 2015
 ##################################################
 
+from gnuradio import analog
 from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio import gr, blocks
@@ -45,13 +46,23 @@ class listening(gr.top_block):
 		self.uhd_usrp_source_0.set_gain(0, 0)
 		self.logpwrfft_x_0 = logpwrfft.logpwrfft_c( sample_rate=samp_rate, fft_size=fft_size, ref_scale=2, frame_rate=frame_rate, avg_alpha=1.0, average=False,)
 
+		self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
+		self.blocks_add_xx_0 = blocks.add_vcc(1)
+		self.init_freq_win = tunning*1e6 
+		self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE,self.init_freq_win, 10, 0)
+
  		self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*fft_size, filepath, False)
 		self.blocks_file_sink_0.set_unbuffered(False)
 
 		##################################################
 		# Connections
 		##################################################
-		self.connect((self.uhd_usrp_source_0, 0), (self.logpwrfft_x_0, 0))
+
+		self.connect((self.analog_sig_source_x_0, 0), (self.blocks_throttle_0, 0))
+		self.connect((self.uhd_usrp_source_0, 0), (self.blocks_add_xx_0, 0))
+		self.connect((self.blocks_throttle_0, 0), (self.blocks_add_xx_0, 1))
+		self.connect((self.blocks_add_xx_0, 0), (self.logpwrfft_x_0, 0))
+
 		self.connect((self.logpwrfft_x_0, 0), (self.blocks_file_sink_0, 0))
 
 
@@ -60,9 +71,11 @@ class listening(gr.top_block):
 	def get_tunning(self):
 		return self.tunning
 
-	def set_tunning(self, tunning):
+	def set_tunning(self, tunning, index):
+		self.init_freq_win = tunning*1e6 + (self.samp_rate / self.fft_size) * ( self.fft_size/ pow(2,index +2))
 		self.tunning = tunning
 		self.uhd_usrp_source_0.set_center_freq(self.tunning*1e6, 0)
+		self.analog_sig_source_x_0.set_frequency(self.tunning*1e6)
 
 	def get_samp_rate(self):
 		return self.samp_rate
@@ -94,7 +107,7 @@ def writeHeaderData(filepath, list_freq, tb, time_between_freqs):
 
 if __name__ == '__main__':
 
-	tbtwfreq = 60
+	tbtwfreq =5 
 
 	code_date_format = "%Y%m%d%H"
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
@@ -107,8 +120,8 @@ if __name__ == '__main__':
 	nbc = NonBlockingConsole()
 	print "Press any key to quit."
 	print "Listening to %d MHz..." % list_freq[index % len(list_freq)]
+	tb.set_tunning(list_freq[index % len(list_freq)], index)
 	tb.start()
-	tb.set_tunning(list_freq[index % len(list_freq)])
 	initial_time = time.time()
 	while (True):
 		current_codeFile = "./DATA-%s.dat" % datetime.datetime.now().strftime(code_date_format)
@@ -124,7 +137,7 @@ if __name__ == '__main__':
 			index = index + 1
 			initial_time = current_time
 			print "Listening to %d MHz..." % list_freq[index % len(list_freq)]
-			tb.set_tunning(list_freq[index % len(list_freq)])
+			tb.set_tunning(list_freq[index % len(list_freq)], index % len(list_freq))
 			
 		if nbc.get_data() != False:
 			break

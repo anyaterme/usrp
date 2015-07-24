@@ -27,6 +27,7 @@ def generate_data(filename="*.dat"):
 	os.chdir(settings.path)
 
 	data = []
+	headerDict = {}
 	for file in glob.glob(filename):
 		if (os.path.exists("./%s.hdr" % file)):
 #			f = open ("./%s.hdr" % file, "r")
@@ -41,8 +42,11 @@ def generate_data(filename="*.dat"):
 			header_extra = f.read()
 			headerDict = eval (header_extra)
 			f.close()
+		else:
+			headerDict['channels']=fftsize
 		dataFile = np.fromfile(file, np.float32)
 		data = np.concatenate([data,np.asarray(dataFile)])
+
 	rates = data.size /fftsize 
 	return headerDict, data, rates
 
@@ -108,6 +112,7 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 				for index in range(block_interferences.size):
 					block_array[index] = ydata[block_interferences[index]]
 				ax.scatter(block_interferences, block_array)
+				ax.scatter(np.argmax(ydata), np.amax(ydata), marker='x', c='red')
 				aux_data = ydata
 				aux_data[np.where(aux_data <= np.median(aux_data) * (1- detection_limit))] = 0
 				aux_data[np.where(aux_data > np.median(aux_data) * (1- detection_limit))] = 1.0
@@ -126,7 +131,7 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 					prev_ydata=ydata
 					ratio = 100
 
-				ax.set_title("%d, Similitud: %d%%" % (diff_std, ratio))
+				ax.set_title("%d, Similitud: %d%%i, Canal Max: %d" % (diff_std, ratio, np.argmax(ydata)) )
 				if (change):
 					ax.set_axis_bgcolor('red')
 				prev_distance = distance
