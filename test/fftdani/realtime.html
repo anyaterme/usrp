@@ -48,7 +48,7 @@
 					strI = "0"+strI;
 				isPaused = $('#pause_button').is(':checked');
 				$('#label_frame').html(strI + ' ' + isPaused);
-				$('#img04').error(function(){i=0}).attr("src", "./images/image"+strI+".png");
+				$('#img04').error(function(){i=0}).attr("src", "./images/img-20150728123704-"+strI+".png");
 				if (!isPaused)
 					i=i+1;
 				setTimeout(function() { animateImage(); },1000/fps/parseInt($('#refresh_freq').val()));

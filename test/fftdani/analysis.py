@@ -30,14 +30,6 @@ def generate_data(filename="*.dat"):
 	headerDict = {}
 	for file in glob.glob(filename):
 		if (os.path.exists("./%s.hdr" % file)):
-#			f = open ("./%s.hdr" % file, "r")
-#			data_with_header = f.read()
-#			f.close()
-#			header = pmt.deserialize_str(data_with_header)
-#			headerDict = pfm.parse_header(header)
-#			auxDict={}
-#			pfm.parse_extra_dict(header, auxDict, True)
-#			print auxDict
 			f = open ("./%s.hdr" % file, "r")
 			header_extra = f.read()
 			headerDict = eval (header_extra)
@@ -82,18 +74,35 @@ def generate_animation(path="./", filename="*.dat"):
 
 def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 	global line
-	print "GENERATING FRAME "
-	print path
-	print "\tRemoving older images... "
-	for file in glob.glob(path+"/*.png"):
-		os.remove(file)
+#	print "GENERATING FRAME "
+#	print "\tRemoving older images... "
+#	for file in glob.glob(path+"/*.png"):
+#		os.remove(file)
 	perc = 0
 	prev_ydata=data[0:fftsize]
 	prev_distance = 0
 	nbc = NonBlockingConsole()
 	dataReferences = []
+	index_freq = [10]
+	prefix_img = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+	try:
+		index_freq = headerDict["index_freqs"]
+	except:
+		pass
 	print "Press any key to stop frame's generation..."
 	for i in range(0,rates):
+		current_freq = 0
+		try:
+			current_freq_list = [ n for n,freq_frame in enumerate(index_freq) if freq_frame < i]
+			current_freq_list.reverse()
+			current_freq = current_freq_list[0] + 1
+		except:
+			pass
+		try:
+			current_freq = current_freq % len(headerDict["list_freq"])
+			current_freq = headerDict["list_freq"][current_freq]
+		except:
+			pass
 		fig, ax = plt.subplots()
 		plt.xlim(0, fftsize)
 		plt.ylim(np.amin(data)*1.1, np.amax(data)*1.1)
@@ -113,42 +122,13 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 					block_array[index] = ydata[block_interferences[index]]
 				ax.scatter(block_interferences, block_array)
 				ax.scatter(np.argmax(ydata), np.amax(ydata), marker='x', c='red')
-				aux_data = ydata
-				aux_data[np.where(aux_data <= np.median(aux_data) * (1- detection_limit))] = 0
-				aux_data[np.where(aux_data > np.median(aux_data) * (1- detection_limit))] = 1.0
-				#ydata = aux_data
-				distance = dist.sqeuclidean(ydata, prev_ydata)
-				diff_std = abs(np.std(ydata) - np.std(prev_ydata))
-				change = False
-				if (prev_distance!= 0):
-					ratio = (min([distance, prev_distance])*1.0)/(max([distance, prev_distance])*1.0) * 100.0
-					if ((ratio < 50.0) and (diff_std > 2)):
-						change = True
-						dataReferences.append(ydata)
-						prev_ydata=ydata
-				else:
-					dataReferences.append(ydata)
-					prev_ydata=ydata
-					ratio = 100
+				ax.set_title("Center Freq: %d MHz" % current_freq)
 
-				ax.set_title("%d, Similitud: %d%%i, Canal Max: %d" % (diff_std, ratio, np.argmax(ydata)) )
-				if (change):
-					ax.set_axis_bgcolor('red')
-				prev_distance = distance
-
-#				block_array = np.empty(x.size)
-#				block_array.fill(np.min(ydata))
-#				for index in block_interferences:
-#					block_array[index] = 0
-#				line, = ax.plot(x, block_array, 'black')
-			plt.savefig(os.path.join(path, "image%05d.png" % i))
+			plt.savefig(os.path.join(path, "img-%s-%05d.png" % (prefix_img, i)))
 			plt.close()
 			if int(i*1.0/rates*100.0) != perc:
 				perc = int(i*1.0/rates*100.0)
 				print "%d%% completed...." % perc
-		else:
-			prev_distance=0
-
 		if nbc.get_data() != False:
 			break
 
@@ -170,7 +150,6 @@ def detect_signal(data, rates, headerDict, detection_limit = 0.1, print_msg = Fa
 	positives = np.unique(positives)
 	if (print_msg):
 		samp_rate = headerDict["samp_rate"]
-		center_freq = headerDict["center_freq"]
 		channel_width = samp_rate / fftsize
 		print "Signal detected in:"
 		for index in positives:
@@ -186,14 +165,17 @@ x = None
 if (__name__ == '__main__'):
 	parser= ArgumentParser(description = "Data analysis of file from USRP")
 	parser.add_argument('--files', help='List of files to process', nargs='+')
+	parser.add_argument('--imgpath', help='List of files to process', default="./images")
 	arguments = parser.parse_args()
 	listFiles = arguments.files
+	imgPath = arguments.imgpath
 	if listFiles == None:
 		listFiles = glob.glob("./*.dat")
+	print "Iniciando... %s" % datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 	for file in listFiles:
 		#generate_animation("./fttusrp.dat")
 		headerDict, data, rates = generate_data(file)
-		print headerDict
 		#detect_signal(data, rates, headerDict, 0.1, True)
-		generate_frames(data, rates, fftsize, "./images", 0.1)
+		generate_frames(data, rates, fftsize, imgPath, 0.1)
 	
+	print "Finalizado... %s" % datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")

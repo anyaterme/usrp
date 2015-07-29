@@ -3,7 +3,7 @@
 # Gnuradio Python Flow Graph
 # Title: listening
 # Author: Daniel Diaz
-# Generated: Fri Jul 24 13:44:30 2015
+# Generated: Mon Jul 27 12:43:46 2015
 ##################################################
 
 from PyQt4 import Qt
@@ -91,6 +91,7 @@ class listening_gnuradio(gr.top_block, Qt.QWidget):
         )
         self.blocks_throttle_0_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
+        self.blocks_tag_debug_0 = blocks.tag_debug(gr.sizeof_float*1024, "test", ""); self.blocks_tag_debug_0.set_display(True)
         self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_float*1024, "/home/laboratorio/develop/usrp/test/fftdani/data.dat", False)
         self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
@@ -108,6 +109,7 @@ class listening_gnuradio(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_throttle_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_throttle_0_0, 0))
         self.connect((self.blocks_throttle_0_0, 0), (self.blocks_add_xx_0, 2))
+        self.connect((self.logpwrfft_x_0, 0), (self.blocks_tag_debug_0, 0))
 
 
 # QT sink close method reimplementation
@@ -121,24 +123,24 @@ class listening_gnuradio(gr.top_block, Qt.QWidget):
 
     def set_tunning(self, tunning):
         self.tunning = tunning
-        self.uhd_usrp_source_0.set_center_freq(self.tunning*1e6, 0)
         self.analog_sig_source_x_0.set_frequency(self.tunning*1e6 + (self.samp_rate / 1024) *256)
         self.analog_sig_source_x_0_0.set_frequency(self.tunning*1e6 + (self.samp_rate / 1024) *512)
+        self.uhd_usrp_source_0.set_center_freq(self.tunning*1e6, 0)
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.logpwrfft_x_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.blocks_throttle_0_0.set_sample_rate(self.samp_rate)
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
-        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0.set_frequency(self.tunning*1e6 + (self.samp_rate / 1024) *256)
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0.set_frequency(self.tunning*1e6 + (self.samp_rate / 1024) *512)
+        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
+        self.logpwrfft_x_0.set_sample_rate(self.samp_rate)
 
     def get_fft_size(self):
         return self.fft_size
