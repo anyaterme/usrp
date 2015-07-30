@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import settings
-import sys, os, datetime, glob
+import sys, os, datetime, glob, time
 import pmt
 from gnuradio.blocks import parse_file_metadata as pfm
 from argparse import ArgumentParser
@@ -72,7 +72,7 @@ def generate_animation(path="./", filename="*.dat"):
 	print datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 	print "FIN ANIMACION"
 
-def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
+def generate_frames(data, rates, fftsize, path="./", detection_limit = None, filename=None):
 	global line
 #	print "GENERATING FRAME "
 #	print "\tRemoving older images... "
@@ -85,6 +85,9 @@ def generate_frames(data, rates, fftsize, path="./", detection_limit = None):
 	dataReferences = []
 	index_freq = [10]
 	prefix_img = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+	if filename != None:
+		prefix_img = filename.split('.')
+		prefix_img = prefix_img[0]
 	try:
 		index_freq = headerDict["index_freqs"]
 	except:
@@ -171,11 +174,14 @@ if (__name__ == '__main__'):
 	imgPath = arguments.imgpath
 	if listFiles == None:
 		listFiles = glob.glob("./*.dat")
+	start = time.time()
 	print "Iniciando... %s" % datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 	for file in listFiles:
 		#generate_animation("./fttusrp.dat")
 		headerDict, data, rates = generate_data(file)
 		#detect_signal(data, rates, headerDict, 0.1, True)
-		generate_frames(data, rates, fftsize, imgPath, 0.1)
+		generate_frames(data, rates, fftsize, imgPath, 0.1, file)
 	
+	stop = time.time()
 	print "Finalizado... %s" % datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+	print "Duracion : %d" % (stop - start)
