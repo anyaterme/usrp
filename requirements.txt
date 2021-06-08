@@ -1,6 +1,6 @@
 Cheetah==2.4.4
 PAM==0.4.2
-Pillow==2.6.1
+Pillow==8.2.0
 PyOpenGL==3.0.2
 Twisted-Core==14.0.2
 Twisted-Web==14.0.2
