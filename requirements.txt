@@ -14,7 +14,7 @@ debtagshw==0.1
 decorator==3.4.0
 defer==1.0.6
 dirspec==13.10
-html5lib==0.999
+html5lib==0.99999999
 httplib2==0.9
 idna==0.9
 lxml==3.3.6
